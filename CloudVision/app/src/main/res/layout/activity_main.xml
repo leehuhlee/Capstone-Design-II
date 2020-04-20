@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:context="com.google.sample.cloudvision.MainActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="StarGate"
+                android:textSize="30sp"
+                android:textColor="#ffffff"
+                />
+
+            <Button
+                android:id="@+id/btn_nation"
+                android:layout_width="50dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:gravity="center"
+                android:layout_weight="1"
+                android:background="?attr/colorPrimary"
+                android:layout_marginTop="15dp"
+                android:textColor="#ffffff"
+                android:drawableTop="@drawable/ic_more_vert_black_24dp"/>
+
+        </android.support.v7.widget.Toolbar>
+
+
+
+    </android.support.design.widget.AppBarLayout>
+
+    <include layout="@layout/content_main" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom">
+
+        <Button
+            android:id="@+id/btn_album"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:background="#ffffff"
+            android:drawableTop="@drawable/ic_photo_black_24dp"
+            android:text="album" />
+
+        <Button
+            android:id="@+id/btn_camera"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom|center"
+            android:layout_weight="1"
+            android:background="#ffffff"
+            android:drawableTop="@drawable/ic_camera_black_24dp"
+            android:text="camera" />
+
+        <Button
+            android:id="@+id/btn_keyboard"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
+            android:layout_gravity="bottom|end"
+            android:layout_weight="1"
+            android:background="#ffffff"
+            android:drawableTop="@drawable/ic_keyboard_black_24dp"
+            android:text="keyboard" />
+
+    </LinearLayout>
+
+</android.support.design.widget.CoordinatorLayout>

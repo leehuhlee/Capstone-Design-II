@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "346628688985",
+    "firebase_url": "https://cloudvision-1d32d.firebaseio.com",
+    "project_id": "cloudvision-1d32d",
+    "storage_bucket": "cloudvision-1d32d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:346628688985:android:887639c65f63dcd188b548",
+        "android_client_info": {
+          "package_name": "com.google.sample.cloudvision"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "346628688985-iesrgfavhh7h8g5sdqigu5q7r38ckkr7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.sample.cloudvision",
+            "certificate_hash": "f0cc031654bbfdfd6e0bfe42ef65c7fe4489ad9c"
+          }
+        },
+        {
+          "client_id": "346628688985-u341lb54dcom42qj1uh8b1ib08v33hmg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFrTcvctyYbY1AvZYsc_Tn63zgLOvLepU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "346628688985-u341lb54dcom42qj1uh8b1ib08v33hmg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

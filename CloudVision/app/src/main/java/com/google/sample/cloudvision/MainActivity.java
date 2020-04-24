@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.TabLayout;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -95,6 +96,9 @@ public class MainActivity extends AppCompatActivity {
        1 : United State
     */
 
+    private TabLayout tab_layout;
+    private int pos = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,10 +118,10 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //Firebase DB의 데이터를 받아오는 곳
                 arrayList.clear();//초기화
-                int i=0;
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                int i = 0;
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                     //반복문으로 데이터 리스트 추출
-                    if(nation==i) {
+                    if (nation == i) {
                         for (DataSnapshot snapshot2 : snapshot.getChildren()) {
                             Stuff stuff = snapshot2.getValue(Stuff.class);
                             arrayList.add(stuff);
@@ -208,10 +212,10 @@ public class MainActivity extends AppCompatActivity {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 //Firebase DB의 데이터를 받아오는 곳
                                 arrayList.clear();//초기화
-                                int i=0;
-                                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                int i = 0;
+                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                     //반복문으로 데이터 리스트 추출
-                                    if(nation==i) {
+                                    if (nation == i) {
                                         for (DataSnapshot snapshot2 : snapshot.getChildren()) {
                                             Stuff stuff = snapshot2.getValue(Stuff.class);
                                             arrayList.add(stuff);
@@ -236,10 +240,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        tab_layout = findViewById(R.id.tab_layout);
+        tab_layout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                pos = tab.getPosition();
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+                pos = tab.getPosition();
+                Log.e("position", String.valueOf(pos));
+            }
+        });
+
         mImageDetails = findViewById(R.id.image_details);
         mMainImage = findViewById(R.id.main_image);
-    }
 
+    }
 
 
     public void startGalleryChooser() {
@@ -369,13 +392,25 @@ public class MainActivity extends AppCompatActivity {
             base64EncodedImage.encodeContent(imageBytes);
             annotateImageRequest.setImage(base64EncodedImage);
 
-            // add the features we want
-            annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
-                Feature labelDetection = new Feature();
-                labelDetection.setType("LABEL_DETECTION");
-                labelDetection.setMaxResults(MAX_LABEL_RESULTS);
-                add(labelDetection);
-            }});
+            switch (pos) {
+                case 0:
+                    // add the features we want
+                    annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
+                        Feature labelDetection = new Feature();
+                        labelDetection.setType("LABEL_DETECTION");
+                        labelDetection.setMaxResults(MAX_LABEL_RESULTS);
+                        add(labelDetection);
+                    }});
+                    break;
+                case 1:
+                    annotateImageRequest.setFeatures(new ArrayList<Feature>() {{
+                        Feature textDetection = new Feature();
+                        textDetection.setType("TEXT_DETECTION");
+                        textDetection.setMaxResults(10);
+                        add(textDetection);
+                    }});
+                    break;
+            }
 
             // Add the list of one thing to the request
             add(annotateImageRequest);
@@ -390,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
         return annotateRequest;
     }
 
-    private static class LableDetectionTask extends AsyncTask<Object, Void, String> {
+    private class LableDetectionTask extends AsyncTask<Object, Void, String> {
         private final WeakReference<MainActivity> mActivityWeakReference;
         private Vision.Images.Annotate mRequest;
 
@@ -418,22 +453,20 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String result) {
             MainActivity activity = mActivityWeakReference.get();
             String str1 = "Carry On : O", str2 = "Checked : O", str3 = "Detail : ";
-            String option1=null, option2=null, option3=null;
-            int i=0;
+            String option1 = null, option2 = null, option3 = null;
+            int i = 0;
 
             if (activity != null && !activity.isFinishing()) {
                 TextView imageDetail = activity.findViewById(R.id.image_details);
                 imageDetail.setText(result);
-
-                result = result.replaceAll("\n", "");
 
                 activity.tv_option1.setVisibility(View.VISIBLE);
                 activity.tv_option2.setVisibility(View.VISIBLE);
                 activity.tv_option3.setVisibility(View.VISIBLE);
 
 
-                for(Stuff element : activity.arrayList){
-                    if(element.name.equals(result)){
+                for (Stuff element : activity.arrayList) {
+                    if (element.name.equals(result)) {
                         option1 = activity.arrayList.get(i).getOption1();
                         option2 = activity.arrayList.get(i).getOption2();
                         option3 = activity.arrayList.get(i).getOption3();
@@ -491,20 +524,28 @@ public class MainActivity extends AppCompatActivity {
         return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
     }
 
-    private static String convertResponseToString(BatchAnnotateImagesResponse response) {
-
-        StringBuilder message = new StringBuilder("");
-
+    private String convertResponseToString(BatchAnnotateImagesResponse response) {
         List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
-        if (labels != null) {
-            EntityAnnotation label = labels.get(0);
-            message.append(String.format(Locale.US, "%s", label.getDescription()));
-            message.append("\n");
-        } else {
-            message.append("nothing");
+        switch (pos) {
+            case 0:
+                StringBuilder message = new StringBuilder("");
+                if (labels != null) {
+                    EntityAnnotation label = labels.get(0);
+                    message.append(String.format(Locale.US, "%s", label.getDescription()));
+                } else {
+                    message.append("nothing");
+                }
+                return message.toString();
+            case 1:
+                String message_logo = "";
+                if (labels != null) {
+                    message_logo  = labels.get(0).getDescription();
+                } else {
+                    message_logo  = "nothing";
+                }
+                return message_logo;
         }
-
-        return message.toString();
+        return null;
     }
 
     private void SearchbyKeyboard(String result) {
@@ -530,7 +571,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             i++;
-            if(i> arrayList.size()-1){
+            if (i > arrayList.size() - 1) {
                 databaseReference2.push().setValue(result);
             }
         }

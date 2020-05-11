@@ -525,10 +525,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private String convertResponseToString(BatchAnnotateImagesResponse response) {
-        List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
         switch (pos) {
             case 0:
                 StringBuilder message = new StringBuilder("");
+                List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
                 if (labels != null) {
                     EntityAnnotation label = labels.get(0);
                     message.append(String.format(Locale.US, "%s", label.getDescription()));
@@ -538,8 +538,12 @@ public class MainActivity extends AppCompatActivity {
                 return message.toString();
             case 1:
                 String message_logo = "";
-                if (labels != null) {
-                    message_logo  = labels.get(0).getDescription();
+                String[] message_array;
+                List<EntityAnnotation> labels_logo = response.getResponses().get(0).getTextAnnotations();
+                if (labels_logo != null) {
+                    message_logo  = labels_logo.get(0).getDescription();
+                    message_array = message_logo.split("\n");
+                    message_logo = message_array[0];
                 } else {
                     message_logo  = "nothing";
                 }

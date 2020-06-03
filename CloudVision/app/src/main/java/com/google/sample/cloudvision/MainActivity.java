@@ -57,6 +57,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.sample.cloudvision.feedback.FeedbackActivity;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,8 +67,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-
-public class MainActivity extends AppCompatActivity {
+//// feddback - onclicklistener 추가 ////
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String CLOUD_VISION_API_KEY = "AIzaSyCqJbvsJa_QkM2ZJp3vn-bFGlJkoJkwppQ";
     public static final String FILE_NAME = "temp.jpg";
     private static final String ANDROID_CERT_HEADER = "X-Android-Cert";
@@ -170,14 +171,14 @@ public class MainActivity extends AppCompatActivity {
                 ad.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String result = et.getText().toString();
+                        String result = et.getText().toString().toLowerCase();
                         mImageDetails.setText(result);
                         SearchbyKeyboard(result);
                         dialog.dismiss();
                     }
                 });
 
-                ad.setNegativeButton("Cancle", new DialogInterface.OnClickListener() {
+                ad.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
@@ -261,6 +262,11 @@ public class MainActivity extends AppCompatActivity {
 
         mImageDetails = findViewById(R.id.image_details);
         mMainImage = findViewById(R.id.main_image);
+
+        //// feedback 버튼, 리스너 추가
+        Button btn_feedback = (Button)findViewById(R.id.btn_feedback);
+        btn_feedback.setOnClickListener(this);
+        ////
 
     }
 
@@ -563,7 +569,8 @@ public class MainActivity extends AppCompatActivity {
 
 
         for (Stuff element : arrayList) {
-            if (element.name.equals(result)) {
+            String element_name = element.name.toLowerCase();
+            if (element_name.equals(result)) {
                 option1 = arrayList.get(i).getOption1();
                 option2 = arrayList.get(i).getOption2();
                 option3 = arrayList.get(i).getOption3();
@@ -586,4 +593,21 @@ public class MainActivity extends AppCompatActivity {
 
         mMainImage.setImageBitmap(null);
     }
+
+    //// feedback 버튼 클릭하면 feedback activity 실행
+
+    @Override
+    public void onClick(View v) {
+        Intent i = null;
+        switch (v.getId()) {
+            case R.id.btn_feedback:
+                i = new Intent(this, FeedbackActivity.class);
+                startActivity(i);
+                break;
+            default:
+                break;
+        }
+    }
+
+    ////
 }

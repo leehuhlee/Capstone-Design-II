@@ -45,6 +45,17 @@
                     />
 
                 <Button
+                    android:id="@+id/btn_airline"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="#00ff0000"
+                    android:layout_marginTop="15dp"
+                    android:gravity="center"
+                    android:textColor="#ffffff"
+                    android:drawableTop="@drawable/ic_flight_takeoff_white_24dp"  />
+
+                <Button
                     android:id="@+id/btn_nation"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"

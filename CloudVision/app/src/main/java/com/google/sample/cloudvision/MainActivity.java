@@ -82,20 +82,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public static final int CAMERA_PERMISSIONS_REQUEST = 2;
     public static final int CAMERA_IMAGE_REQUEST = 3;
 
-    private TextView mImageDetails, tv_option1, tv_option2, tv_option3;
+    private TextView mImageDetails, tv_option1, tv_option2, tv_option3, tv_nation, tv_airline;
     private ImageView mMainImage;
-    private Button btn_album, btn_camera, btn_keyboard, btn_nation;
+    private Button btn_album, btn_camera, btn_keyboard, btn_nation, btn_airline;
 
     //Firebase DB
-    private ArrayList<Stuff> arrayList;
+    private ArrayList<Stuff> airlineStuffList, nationStuffList;
     private FirebaseDatabase database;
-    private DatabaseReference databaseReference, databaseReference2;
+    private DatabaseReference databaseReferenceStuff, databaseReferenceLog;
 
     //국가지정
     private int nation = 0;
     /* 0 : South Korea
        1 : United State
     */
+
+    //항공사 지정
+    private int airline = 1;
+    /*  0 : Asiana Airlines
+        1 : Korean Air
+    */
+
+    //DB
+    private int Airline_DB = 0;
+    private int Nation_DB = 1;
 
     private TabLayout tab_layout;
     private int pos = 0;
@@ -108,28 +118,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         tv_option1 = findViewById(R.id.tv_option1);
         tv_option2 = findViewById(R.id.tv_option2);
         tv_option3 = findViewById(R.id.tv_option3);
+        tv_airline = findViewById(R.id.tv_airline);
+        tv_nation = findViewById(R.id.tv_nation);
 
-        arrayList = new ArrayList<>(); //Stuff를 담을 ArrayList
+        tv_airline.setText("Korean Air");
+        tv_nation.setText("South Korea");
+
+        nationStuffList = new ArrayList<>(); //Stuff를 담을 ArrayList
+        airlineStuffList = new ArrayList<>(); //
         database = FirebaseDatabase.getInstance(); //Firebase DB 연동
-        databaseReference = database.getReference("Stuff"); //DB 테이블 연결
-        databaseReference2 = database.getReference("Log");
+        databaseReferenceStuff = database.getReference("Stuff"); //DB 테이블 연결
+        databaseReferenceLog = database.getReference("Log");
 
-        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReferenceStuff.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 //Firebase DB의 데이터를 받아오는 곳
-                arrayList.clear();//초기화
-                int i = 0;
+                airlineStuffList.clear();
+                nationStuffList.clear();//초기화
+
+                int which_db = 0; // 0: Airline, 1: Nation
+                // Stuff의 children: Nation, Airline
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    //반복문으로 데이터 리스트 추출
-                    if (nation == i) {
+                    // Airline DB 불러오기
+                    if (which_db == Airline_DB) {
+                        int i = 0;
                         for (DataSnapshot snapshot2 : snapshot.getChildren()) {
-                            Stuff stuff = snapshot2.getValue(Stuff.class);
-                            arrayList.add(stuff);
+                            if (airline == i) {
+                                for (DataSnapshot snapshot3 : snapshot2.getChildren()) {
+                                    Stuff stuff = snapshot3.getValue(Stuff.class);
+                                    airlineStuffList.add(stuff);
+                                }
+                                break;
+                            }
+                            i++;
                         }
-                        break;
                     }
-                    i++;
+
+                    // Nation DB 불러오기
+                    if (which_db == Nation_DB) {
+                        int i = 0;
+                        for (DataSnapshot snapshot2 : snapshot.getChildren()) {
+                            if (nation == i) {
+                                for (DataSnapshot snapshot3 : snapshot2.getChildren()) {
+                                    Stuff stuff = snapshot3.getValue(Stuff.class);
+                                    nationStuffList.add(stuff);
+                                }
+                                break;
+                            }
+                            i++;
+                        }
+                    }
+                    which_db++;
                 }
             }
 
@@ -171,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 ad.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String result = et.getText().toString().toLowerCase();
+                        String result = et.getText().toString();
                         mImageDetails.setText(result);
                         SearchbyKeyboard(result);
                         dialog.dismiss();
@@ -203,27 +243,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         switch (which) {
                             case 0:
                                 nation = 0;
+                                tv_nation.setText("South Korea");
                                 break;
                             case 1:
                                 nation = 1;
+                                tv_nation.setText("United States");
                                 break;
                         }
-                        databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+                        databaseReferenceStuff.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                 //Firebase DB의 데이터를 받아오는 곳
-                                arrayList.clear();//초기화
-                                int i = 0;
+                                nationStuffList.clear();//초기화
+
+                                int which_db = 0; // 0: Airline, 1: Nation
+                                // Stuff의 children: Nation, Airline
                                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                    //반복문으로 데이터 리스트 추출
-                                    if (nation == i) {
+                                    // Nation DB 불러오기
+                                    if (which_db == Nation_DB) {
+                                        int i = 0;
                                         for (DataSnapshot snapshot2 : snapshot.getChildren()) {
-                                            Stuff stuff = snapshot2.getValue(Stuff.class);
-                                            arrayList.add(stuff);
+                                            if (nation == i) {
+                                                for (DataSnapshot snapshot3 : snapshot2.getChildren()) {
+                                                    Stuff stuff = snapshot3.getValue(Stuff.class);
+                                                    nationStuffList.add(stuff);
+                                                }
+                                                break;
+                                            }
+                                            i++;
                                         }
-                                        break;
                                     }
-                                    i++;
+                                    which_db++;
                                 }
                             }
 
@@ -238,6 +289,67 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
                 builder.show();
 
+            }
+        });
+
+        btn_airline = findViewById(R.id.btn_airline);
+        btn_airline.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                CharSequence airlines[] = new CharSequence[]{"Asiana Airlines", "Korean Air"};
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Select Airline");
+                builder.setItems(airlines, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        switch (which) {
+                            case 0:
+                                airline = 0;
+                                tv_airline.setText("Asiana Airlines");
+                                break;
+                            case 1:
+                                airline = 1;
+                                tv_airline.setText("Korean Air");
+                                break;
+                        }
+                        databaseReferenceStuff.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                //Firebase DB의 데이터를 받아오는 곳
+                                airlineStuffList.clear();//초기화
+
+                                int which_db = 0; // 0: Airline, 1: Nation
+                                // Stuff의 children: Nation, Airline
+                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                    // Airline DB 불러오기
+                                    if (which_db == Airline_DB) {
+                                        int i = 0;
+                                        for (DataSnapshot snapshot2 : snapshot.getChildren()) {
+                                            if (airline == i) {
+                                                for (DataSnapshot snapshot3 : snapshot2.getChildren()) {
+                                                    Stuff stuff = snapshot3.getValue(Stuff.class);
+                                                    airlineStuffList.add(stuff);
+                                                }
+                                                break;
+                                            }
+                                            i++;
+                                        }
+                                    }
+                                    which_db++;
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                //에러 발생 시
+                                Log.e("MainActivity", String.valueOf(databaseError.toException()));
+                            }
+                        });
+
+                    }
+                });
+                builder.show();
             }
         });
 
@@ -460,7 +572,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             MainActivity activity = mActivityWeakReference.get();
             String str1 = "Carry On : O", str2 = "Checked : O", str3 = "Detail : ";
             String option1 = null, option2 = null, option3 = null;
-            int i = 0;
+            String nation_option1 = null, nation_option2 = null, nation_option3 = "";
+            String airline_option1 = null, airline_option2 = null, airline_option3 = "";
+            int i = 0, j = 0;
 
             if (activity != null && !activity.isFinishing()) {
                 TextView imageDetail = activity.findViewById(R.id.image_details);
@@ -470,20 +584,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 activity.tv_option2.setVisibility(View.VISIBLE);
                 activity.tv_option3.setVisibility(View.VISIBLE);
 
-
-                for (Stuff element : activity.arrayList) {
+                for (Stuff element : activity.nationStuffList) {
                     if (element.name.equals(result)) {
-                        option1 = activity.arrayList.get(i).getOption1();
-                        option2 = activity.arrayList.get(i).getOption2();
-                        option3 = activity.arrayList.get(i).getOption3();
-
-                        str1 = "Carry On : " + option1;
-                        str2 = "Checked : " + option2;
-                        str3 = "Detail : " + option3;
+                        nation_option1 = activity.nationStuffList.get(i).getOption1();
+                        nation_option2 = activity.nationStuffList.get(i).getOption2();
+                        nation_option3 = activity.nationStuffList.get(i).getOption3();
                         break;
                     }
                     i++;
                 }
+
+                for (Stuff element : activity.airlineStuffList) {
+                    if (element.name.equals(result)) {
+                        airline_option1 = activity.airlineStuffList.get(j).getOption1();
+                        airline_option2 = activity.airlineStuffList.get(j).getOption2();
+                        airline_option3 = activity.airlineStuffList.get(j).getOption3();
+                        break;
+                    }
+                    j++;
+                }
+
+                if ("X".equals(nation_option1) || "X".equals(airline_option1))
+                    option1 = "X";
+                else
+                    option1 = "O";
+
+                if ("X".equals(nation_option2) || "X".equals(airline_option2))
+                    option2 = "X";
+                else
+                    option2 = "O";
+
+                if (nation_option3.length() < airline_option3.length())
+                    option3 = airline_option3;
+                else
+                    option3 = nation_option3;
+
+                str1 = "Carry On : " + option1;
+                str2 = "Checked : " + option2;
+                str3 = "Detail : " + option3;
 
                 activity.tv_option1.setText(str1);
                 activity.tv_option2.setText(str2);
@@ -561,30 +699,61 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void SearchbyKeyboard(String result) {
         String str1 = "Carry On : O", str2 = "Checked : O", str3 = "Detail : ";
         String option1 = null, option2 = null, option3 = null;
-        int i = 0;
+        String nation_option1 = null, nation_option2 = null, nation_option3 = "";
+        String airline_option1 = null, airline_option2 = null, airline_option3 = "";
+        String log_msg = null;
+        int i = 0, j = 0;
+        boolean is_new_keyword = true;
 
         tv_option1.setVisibility(View.VISIBLE);
         tv_option2.setVisibility(View.VISIBLE);
         tv_option3.setVisibility(View.VISIBLE);
 
-
-        for (Stuff element : arrayList) {
-            String element_name = element.name.toLowerCase();
-            if (element_name.equals(result)) {
-                option1 = arrayList.get(i).getOption1();
-                option2 = arrayList.get(i).getOption2();
-                option3 = arrayList.get(i).getOption3();
-
-                str1 = "Carry On : " + option1;
-                str2 = "Checked : " + option2;
-                str3 = "Detail : " + option3;
-
+        for (Stuff element : nationStuffList) {
+            if (element.name.equalsIgnoreCase(result)) {
+                nation_option1 = nationStuffList.get(i).getOption1();
+                nation_option2 = nationStuffList.get(i).getOption2();
+                nation_option3 = nationStuffList.get(i).getOption3();
+                is_new_keyword = false;
                 break;
             }
             i++;
-            if (i > arrayList.size() - 1) {
-                databaseReference2.push().setValue(result);
+        }
+
+        for (Stuff element : airlineStuffList) {
+            if (element.name.equalsIgnoreCase(result)) {
+                airline_option1 = airlineStuffList.get(j).getOption1();
+                airline_option2 = airlineStuffList.get(j).getOption2();
+                airline_option3 = airlineStuffList.get(j).getOption3();
+                is_new_keyword = false;
+                break;
             }
+            j++;
+        }
+
+        if ("X".equals(nation_option1) || "X".equals(airline_option1))
+            option1 = "X";
+        else
+            option1 = "O";
+
+        if ("X".equals(nation_option2) || "X".equals(airline_option2))
+            option2 = "X";
+        else
+            option2 = "O";
+
+        if (nation_option3.length() < airline_option3.length())
+            option3 = airline_option3;
+        else
+            option3 = nation_option3;
+
+        str1 = "Carry On : " + option1;
+        str2 = "Checked : " + option2;
+        str3 = "Detail : " + option3;
+
+        if (is_new_keyword == true) {
+            // log_msg : A1N0 toy (Airline: Asiana, Nation: South Korea, Stuff: toy)
+            log_msg = "A" + airline + "N" + nation + " " + result;
+            databaseReferenceLog.push().setValue(log_msg);
         }
 
         tv_option1.setText(str1);

@@ -585,7 +585,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 activity.tv_option3.setVisibility(View.VISIBLE);
 
                 for (Stuff element : activity.nationStuffList) {
-                    if (element.name.equals(result)) {
+                    if (element.name.equalsIgnoreCase(result)) {
                         nation_option1 = activity.nationStuffList.get(i).getOption1();
                         nation_option2 = activity.nationStuffList.get(i).getOption2();
                         nation_option3 = activity.nationStuffList.get(i).getOption3();
@@ -595,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
 
                 for (Stuff element : activity.airlineStuffList) {
-                    if (element.name.equals(result)) {
+                    if (element.name.equalsIgnoreCase(result)) {
                         airline_option1 = activity.airlineStuffList.get(j).getOption1();
                         airline_option2 = activity.airlineStuffList.get(j).getOption2();
                         airline_option3 = activity.airlineStuffList.get(j).getOption3();

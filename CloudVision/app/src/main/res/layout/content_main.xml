@@ -27,7 +27,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
                 android:gravity="center"
-                android:text="Use the button \nto select an image."
+                android:text="Use buttons \nto upload object data."
                 android:textSize="40sp" />
 
             <ImageView
